@@ -346,6 +346,42 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href = "/2019/11/06/slq-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93-%E4%B8%AD/" >
+            
+                <span>slq-注入总结(中)</span>
+        </a>
+        <div class="abstract-content">
+            上一节中，大致把sql中的函数记录了下，如果有什么不足希望各位师傅斧正。晚自习没课，所以现在把常见的注入方式，以及利用过程讲一下。
+注入类型
+数值型注入
+也就是说后台的sql语句直接拼接的一个数值，可以通过以下方式进行初步判断，如果有waf，那么可以尝试使用注释符等将waf过滤的关键字进行包裹，使waf无法匹配，达到绕过waf的效果。
+12345?id=1+1?id=-1 or 1=1?id=-1 or 10-2=8?id=1 and 1=2?id=1 and 1=1
+字符型注入
+后台得到一个字符型数据然后进行拼接查询，具体判断方式如下。
+1234?id=1&apos;?id=1&quo...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/11/06</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" target="_blank" rel="noopener" data-tags = "web安全">web安全</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href = "/2019/11/06/sql-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93(%E4%B8%8A)/" >
             
                 <span>sql-注入总结(上)</span>
@@ -470,9 +506,16 @@
     
     
     
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 1
+        Total : 2
         </div>
         <!-- search  -->
         
@@ -485,6 +528,11 @@
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/2019/11/06/slq-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93-%E4%B8%AD/" >slq-注入总结(中)</a>
+        </li>
     
     
         <li class="archive-post-item">
