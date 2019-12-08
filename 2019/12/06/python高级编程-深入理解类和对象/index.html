@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="John Doe">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="John Doe">
+    
+    <meta name="keywords" content="se10rc's blog">
+    
+    <meta name="description" content="">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>python高级编程(深入理解类和对象) · se10rc&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >se10rc&#39;s blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">python高级编程(深入理解类和对象)</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>se10rc's blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/se10rc.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            python高级编程(深入理解类和对象)
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" target="_blank" rel="noopener" data-tags = "python">python</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">3k</span>Reading time: <span class="post-count reading-time">12 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/12/06</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="鸭子类型和多态"><a href="#鸭子类型和多态" class="headerlink" title="鸭子类型和多态"></a>鸭子类型和多态</h1><h2 id="面向对象三大特征"><a href="#面向对象三大特征" class="headerlink" title="面向对象三大特征"></a>面向对象三大特征</h2><p>首先介绍下面向对象(OOP)的三大特征:<br>（1）面向对象程序设计有三大特征：封装（Encapsulation）、继承（Inheritance）、多态（Polymorphism）。这三个单词很常见，大家还是记住为好！<br>（2）封装（Encapsulation）：类包含了数据和方法，将数据和方法放在一个类中就构成了封装。<br>（3）继承（Inheritance）：Java是单继承的（这点和C++有区别），意味着一个类只能继承于一个类，被继承的类叫父类（或者叫基类，base class），继承的类叫子类。Java中的继承使用关键字extends。但是，一个类可以实现多个接口，多个接口之间用逗号进行分割。实现接口使用关键字implements。<br>（4）多态（Polymorphism）：多态最核心的思想就是，父类的引用可以指向子类的对象，或者接口类型的引用可以指向实现该接口的类的实例。多态之所以是这样的是因为基于一个事实：子类就是父类！<br>（5）关于多态的一些重要说明：<br>当使用多态方式调用方法时，首先检查父类中是否有此方法，如果没有则编译错误，如果有则再去调用子类重写（Override）【如果重写的话】的此方法，没有重写的话，还是调用从父类继承过来的方法。<br>两种类型的强制类型转换：<br>向上类型转换（upcast）：将子类型引用转换成父类型引用。对于向上类型转换不需要显示指定。<br>向下类型转换（downcast）：将父类型引用转换成子类型引用。对于向下类型转换，必须要显示指定。向下类型转换的原则：父类型引用指向谁才能转换成谁。<br>多态是一种运行期的行为，不是编译期行为！在编译期间它只知道是一个引用，只有到了执行期，引用才知道指向的是谁。这就是所谓的“软绑定”。<br>多态是一项让程序员“将改变的事物和未改变的事物分离开来”重要技术。</p>
+<h2 id="鸭子类型"><a href="#鸭子类型" class="headerlink" title="鸭子类型"></a>鸭子类型</h2><hr>
+<p>调用不同的子类将会产生不同的行为，而无须明确知道这个子类实际上是什么，这是多态的重要应用场景。而在python中，因为鸭子类型(duck typing)使得其多态不是那么酷。<br>鸭子类型是动态类型的一种风格。在这种风格中，一个对象有效的语义，不是由继承自特定的类或实现特定的接口，而是由”当前方法和属性的集合”决定。这个概念的名字来源于由James Whitcomb Riley提出的鸭子测试，“鸭子测试”可以这样表述：“当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子。”<br>在鸭子类型中，关注的不是对象的类型本身，而是它是如何使用的。例如，在不使用鸭子类型的语言中，我们可以编写一个函数，它接受一个类型为”鸭子”的对象，并调用它的”走”和”叫”方法。在使用鸭子类型的语言中，这样的一个函数可以接受一个任意类型的对象，并调用它的”走”和”叫”方法。如果这些需要被调用的方法不存在，那么将引发一个运行时错误。任何拥有这样的正确的”走”和”叫”方法的对象都可被函数接受的这种行为引出了以上表述，这种决定类型的方式因此得名。<br>鸭子类型通常得益于不测试方法和函数中参数的类型，而是依赖文档、清晰的代码和测试来确保正确使用。<br>Duck typing 这个概念来源于美国印第安纳州的诗人詹姆斯·惠特科姆·莱利（James Whitcomb Riley,1849-<br>1916）的诗句：”When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck</p>
+<figure class="highlight plain"><figcaption><span>Duck():</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">    def walk(self):</span><br><span class="line">        print(&apos;I walk like a duck&apos;)</span><br><span class="line">    def swim(self):</span><br><span class="line">        print(&apos;i swim like a duck&apos;)</span><br><span class="line"></span><br><span class="line">class Person():</span><br><span class="line">    def walk(self):</span><br><span class="line">    　　print(&apos;this one walk like a duck&apos;) </span><br><span class="line">    def swim(self):</span><br><span class="line">    　　print(&apos;this man swim like a duck&apos;)</span><br></pre></td></tr></table></figure>
+<p>可以很明显的看出，Person类拥有跟Duck类一样的方法，当有一个函数调用Duck类，并利用到了两个方法walk()和swim()。我们传入Person类也一样可以运行，函数并不会检查对象的类型是不是Duck，只要他拥有walk()和swim()方法，就可以正确的被调用。<br>再举例，如果一个对象实现了<strong>getitem</strong>方法，那python的解释器就会把它当做一个collection，就可以在这个对象上使用切片，获取子项等方法；如果一个对象实现了<strong>iter</strong>和next方法，python就会认为它是一个iterator，就可以在这个对象上通过循环来获取各个子项。</p>
+<h2 id="python中的鸭子类型允许我们使用任何提供所需方法的对象，而不需要迫使它成为一个子类。"><a href="#python中的鸭子类型允许我们使用任何提供所需方法的对象，而不需要迫使它成为一个子类。" class="headerlink" title="python中的鸭子类型允许我们使用任何提供所需方法的对象，而不需要迫使它成为一个子类。"></a>python中的鸭子类型允许我们使用任何提供所需方法的对象，而不需要迫使它成为一个子类。</h2><hr>
+<p>由于python属于动态语言，当你定义了一个基类和基类中的方法，并编写几个继承该基类的子类时，由于python在定义变量时不指定变量的类型，而是由解释器根据变量内容推断变量类型的（也就是说变量的类型取决于所关联的对象），这就使得python的多态不像是c++或java中那样，定义一个基类类型变量而隐藏了具体子类的细节。</p>
+<p>请看下面的例子和说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">class AudioFile:</span><br><span class="line">    def __init__(self, filename):</span><br><span class="line">        if not filename.endswith(self.ext):</span><br><span class="line">            raise Exception(&quot;Invalid file format&quot;)</span><br><span class="line">        self.filename = filename</span><br><span class="line"></span><br><span class="line">class MP3File(AudioFile):</span><br><span class="line">    ext = &quot;mp3&quot;</span><br><span class="line">    def play(self):</span><br><span class="line">        print(&quot;Playing &#123;&#125; as mp3&quot;.format(self.filename))</span><br><span class="line"></span><br><span class="line">class WavFile(AudioFile):</span><br><span class="line">    ext = &quot;wav&quot;</span><br><span class="line">    def play(self):</span><br><span class="line">        print(&quot;Playing &#123;&#125; as wav&quot;.format(self.filename))</span><br><span class="line"></span><br><span class="line">class OggFile(AudioFile):</span><br><span class="line">    ext = &quot;ogg&quot;</span><br><span class="line">    def play(self):</span><br><span class="line">        print(&quot;Playing &#123;&#125; as ogg&quot;.format(self.filename))</span><br><span class="line"></span><br><span class="line">class FlacFile:</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    Though FlacFile class doesn&apos;t inherit AudioFile class,</span><br><span class="line">    it also has the same interface as three subclass of AudioFile.</span><br><span class="line"></span><br><span class="line">    It is called duck typing.</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    def __init__(self, filename):</span><br><span class="line">        if not filename.endswith(&quot;.flac&quot;):</span><br><span class="line">            raise Exception(&quot;Invalid file format&quot;)</span><br><span class="line">        self.filename = filename</span><br><span class="line"></span><br><span class="line">    def play(self):</span><br><span class="line">        print(&quot;Playing &#123;&#125; as flac&quot;.format(self.filename))</span><br></pre></td></tr></table></figure>
+<p>上面的代码中，MP3File、WavFile、OggFile三个类型继承了AudioFile这一基类，而FlacFile没有扩展AudioFile，但是可以在python中使用完全相同的接口与之交互。<br>因为任何提供正确接口的对象都可以在python中交替使用，它减少了多态的一般超类的需求。继承仍然可以用来共享代码，但是如果所有被共享的都是公共接口，鸭子类型就是所有所需的。这减少了继承的需要，同时也减少了多重继承的需要；通常，当多重继承似乎是一个有效方案的时候，我们只需要使用鸭子类型去模拟多个超类之一（定义和那个超类一样的接口和实现）就可以了。</p>
+<h1 id="抽象基类"><a href="#抽象基类" class="headerlink" title="抽象基类"></a>抽象基类</h1><hr>
+<p>抽象基类”这个词可能听着比较”深奥”,其实”基类”就是”父类”,”抽象”就是”假”的意思,</p>
+<p>抽象基类”===”假父类.<br>其实就是父类的意思，换了个说法而已。<br>实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">import abc</span><br><span class="line">class studen(metaclass=abc.ABCMeta):</span><br><span class="line">    @abc.abstractmethod</span><br><span class="line">    def get(self,key):</span><br><span class="line">        pass</span><br><span class="line">    @abc.abstractmethod</span><br><span class="line">    def set(self,key,vlue):</span><br><span class="line">        pass</span><br><span class="line">my_Student = studen()</span><br><span class="line">my_Student.get(key=&apos;1&apos;)</span><br><span class="line">&gt;&gt;&gt;TypeError: Can&apos;t instantiate abstract class studen with abstract methods get, set</span><br></pre></td></tr></table></figure>
+<p>别的类去继承他就需要重写他里面的方法不然就会报错。<br>用处：1.判断某个对象的类型 2.强制某个子类必须实现某些方法。<br>判断是否存在某个函数：hasattr(类名，‘函数名’)<br>isinstance(类名/对象名，另一个类)<br>总而言之，我觉得没卵用。</p>
+<h1 id="类变量和对象变量"><a href="#类变量和对象变量" class="headerlink" title="类变量和对象变量"></a>类变量和对象变量</h1><hr>
+<p>类变量：直接在类中定义的变量。<br>对象变量：实例化对象后中的变量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class test():</span><br><span class="line">    aa =1 #类变量</span><br><span class="line">    def __init__(self,x,y):</span><br><span class="line">        self.x = x #对象变量</span><br><span class="line">        self.y = y # 对象变量</span><br><span class="line"></span><br><span class="line">a = test(1,2)</span><br><span class="line"></span><br><span class="line">print(a.aa,a.x,a.y)</span><br><span class="line">&gt;&gt;&gt;1 1 2</span><br></pre></td></tr></table></figure>
+
+<p>其实就是作用域的问题，x,y是实例传的值，那么他们就是对象变量，而且aa也是实例变量，因为他属于对象a，我们可以对他进行修改，但是只是在实例层的修改，在类层的值还是1。</p>
+<p>变量的查找顺序：由下而上，首先在实例中查找，如果找不到那么就去类中找。</p>
+<h1 id="数据封装和私有属性"><a href="#数据封装和私有属性" class="headerlink" title="数据封装和私有属性"></a>数据封装和私有属性</h1><hr>
+<p>私有属性：在属性前加双下划线</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class user:</span><br><span class="line">    def __init__(self,day):</span><br><span class="line">        self.__day = day</span><br><span class="line"></span><br><span class="line">    def get_age(self):</span><br><span class="line">        return 2019 - self.__day</span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    my_user = user(2018)</span><br><span class="line">    print(my_user.get_age())</span><br></pre></td></tr></table></figure>
+
+<h1 id="super函数"><a href="#super函数" class="headerlink" title="super函数"></a>super函数</h1><hr>
+<p>super:调用父类<br>super(self,’类名’).<strong>init</strong>()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">class A():</span><br><span class="line">    def __init__(self):</span><br><span class="line">        print(&quot;A&quot;)</span><br><span class="line">class B(A):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        print(&quot;B&quot;)</span><br><span class="line">        super().__init__()</span><br><span class="line">class C(A):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        print(&quot;C&quot;)</span><br><span class="line">        super().__init__()</span><br><span class="line">class D(B,C):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        print(&quot;D&quot;)</span><br><span class="line">        super().__init__()</span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    d=D()</span><br><span class="line">&gt;&gt;&gt;D B C A</span><br><span class="line">print(D.mro())</span><br><span class="line">[&lt;class &apos;__main__.D&apos;&gt;, &lt;class &apos;__main__.B&apos;&gt;, &lt;class &apos;__main__.C&apos;&gt;, &lt;class &apos;__main__.A&apos;&gt;, &lt;class &apos;object&apos;&gt;]</span><br></pre></td></tr></table></figure>
+<p>查看其调用关系即可</p>
+<h1 id="python中的with语句"><a href="#python中的with语句" class="headerlink" title="python中的with语句"></a>python中的with语句</h1><hr>
+<p>基本语法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">with EXPR as VAR:</span><br><span class="line">    BLOCK</span><br></pre></td></tr></table></figure>
+<p>上下文管理器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">上下文表达式：with open(&apos;test.txt&apos;) as f:</span><br><span class="line">上下文管理器：open(&apos;test.txt&apos;)</span><br><span class="line">f 不是上下文管理器，应该是资源对象。</span><br></pre></td></tr></table></figure>
+<h2 id="编写上下文管理器"><a href="#编写上下文管理器" class="headerlink" title="编写上下文管理器"></a>编写上下文管理器</h2><p>要自己实现这样一个上下文管理，要先知道上下文管理协议。<br>简单点说，就是在一个类里，实现了<strong>enter</strong>和<strong>exit</strong>的方法，这个类的实例就是一个上下文管理器。<br>代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">class Resource():</span><br><span class="line">    def __enter__(self):</span><br><span class="line">        print(&apos;===connect to resource===&apos;)</span><br><span class="line">        return self</span><br><span class="line">    def __exit__(self, exc_type, exc_val, exc_tb):</span><br><span class="line">        print(&apos;===close resource connection===&apos;)</span><br><span class="line">        </span><br><span class="line">    def operate(self):</span><br><span class="line">        print(&apos;===in operation===&apos;)</span><br><span class="line">        </span><br><span class="line">with Resource() as res:</span><br><span class="line">    res.operate()</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">===connect to resource===</span><br><span class="line">===in operation===</span><br><span class="line">===close resource connection===</span><br></pre></td></tr></table></figure>
+<p>从这个示例可以很明显的看出，在编写代码时，可以将资源的连接或者获取放在<strong>enter</strong>中，而将资源的关闭写在<strong>exit</strong> 中。</p>
+<h1 id="contextlib"><a href="#contextlib" class="headerlink" title="contextlib"></a>contextlib</h1><hr>
+<p>在上面的例子中，我们只是为了构建一个上下文管理器，却写了一个类。如果只是要实现一个简单的功能，写一个类未免有点过于繁杂。这时候，我们就想，如果只写一个函数就可以实现上下文管理器就好了。<br>这个点Python早就想到了。它给我们提供了一个装饰器，你只要按照它的代码协议来实现函数内容，就可以将这个函数对象变成一个上下文管理器。<br>我们按照 contextlib 的协议来自己实现一个打开文件（with open）的上下文管理器。</p>
+<figure class="highlight plain"><figcaption><span>contextlib</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">@contextlib.contextmanager</span><br><span class="line">def open_func(file_name):</span><br><span class="line">    # __enter__方法</span><br><span class="line">    print(&apos;open file:&apos;, file_name, &apos;in __enter__&apos;)</span><br><span class="line">    file_handler = open(file_name, &apos;r&apos;)</span><br><span class="line">    </span><br><span class="line">    # 【重点】：yield</span><br><span class="line">    yield file_handler</span><br><span class="line"></span><br><span class="line">    # __exit__方法</span><br><span class="line">    print(&apos;close file:&apos;, file_name, &apos;in __exit__&apos;)</span><br><span class="line">    file_handler.close()</span><br><span class="line">    return</span><br><span class="line"></span><br><span class="line">with open_func(&apos;/Users/MING/mytest.txt&apos;) as file_in:</span><br><span class="line">    for line in file_in:</span><br><span class="line">        print(line)</span><br></pre></td></tr></table></figure>
+<p>在被装饰函数里，必须是一个生成器（带有yield），而yield之前的代码，就相当于<strong>enter</strong>里的内容。yield 之后的代码，就相当于<strong>exit</strong> 里的内容。<br>上面这段代码只能实现上下文管理器的第一个目的（管理资源），并不能实现第二个目的（处理异常）。<br>如果要处理异常，可以改成下面这个样。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">import contextlib</span><br><span class="line"></span><br><span class="line">@contextlib.contextmanager</span><br><span class="line">def open_func(file_name):</span><br><span class="line">    # __enter__方法</span><br><span class="line">    print(&apos;open file:&apos;, file_name, &apos;in __enter__&apos;)</span><br><span class="line">    file_handler = open(file_name, &apos;r&apos;)</span><br><span class="line"></span><br><span class="line">    try:</span><br><span class="line">        yield file_handler</span><br><span class="line">    except Exception as exc:</span><br><span class="line">        # deal with exception</span><br><span class="line">        print(&apos;the exception was thrown&apos;)</span><br><span class="line">    finally:</span><br><span class="line">        print(&apos;close file:&apos;, file_name, &apos;in __exit__&apos;)</span><br><span class="line">        file_handler.close()</span><br><span class="line"></span><br><span class="line">        return</span><br><span class="line"></span><br><span class="line">with open_func(&apos;/Users/MING/mytest.txt&apos;) as file_in:</span><br><span class="line">    for line in file_in:</span><br><span class="line">        1/0</span><br><span class="line">        print(line)</span><br></pre></td></tr></table></figure>
+
+<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><hr>
+<p>第四章的东西拖沓的有点久，主要是给19级学弟学妹上课准备ppt和一些材料的原因，今晚算是结个尾吧，学到了不少东西，👋。</p>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/12/05/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E9%AD%94%E6%B3%95%E5%87%BD%E6%95%B0%EF%BC%89/" title= "python高级编程（魔法函数）">
+                    <div class="prevTitle">python高级编程（魔法函数）</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:0745sec@gmail.com" target="_blank" rel="noopener" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/se10rc" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#鸭子类型和多态"><span class="toc-number">1.</span> <span class="toc-text">鸭子类型和多态</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#面向对象三大特征"><span class="toc-number">1.1.</span> <span class="toc-text">面向对象三大特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#鸭子类型"><span class="toc-number">1.2.</span> <span class="toc-text">鸭子类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#python中的鸭子类型允许我们使用任何提供所需方法的对象，而不需要迫使它成为一个子类。"><span class="toc-number">1.3.</span> <span class="toc-text">python中的鸭子类型允许我们使用任何提供所需方法的对象，而不需要迫使它成为一个子类。</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#抽象基类"><span class="toc-number">2.</span> <span class="toc-text">抽象基类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#类变量和对象变量"><span class="toc-number">3.</span> <span class="toc-text">类变量和对象变量</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据封装和私有属性"><span class="toc-number">4.</span> <span class="toc-text">数据封装和私有属性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#super函数"><span class="toc-number">5.</span> <span class="toc-text">super函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#python中的with语句"><span class="toc-number">6.</span> <span class="toc-text">python中的with语句</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#编写上下文管理器"><span class="toc-number">6.1.</span> <span class="toc-text">编写上下文管理器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#contextlib"><span class="toc-number">7.</span> <span class="toc-text">contextlib</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#写在最后"><span class="toc-number">8.</span> <span class="toc-text">写在最后</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 7
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span><a class="archive-post-title" href= "/2019/12/06/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E7%B1%BB%E5%92%8C%E5%AF%B9%E8%B1%A1/" >python高级编程(深入理解类和对象)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span><a class="archive-post-title" href= "/2019/12/05/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E9%AD%94%E6%B3%95%E5%87%BD%E6%95%B0%EF%BC%89/" >python高级编程（魔法函数）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span><a class="archive-post-title" href= "/2019/12/04/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E4%B8%80%E5%88%87%E7%9A%86%E5%AF%B9%E8%B1%A1%EF%BC%89/" >python高级编程（一切皆对象）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href= "/2019/11/27/%E6%B9%96%E6%B9%98%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%84%9F%E6%83%B3/" >湖湘杯线下赛感想</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/13</span><a class="archive-post-title" href= "/2019/11/13/%E5%85%B3%E4%BA%8Ecms%E6%BC%8F%E6%B4%9E%E6%94%B6%E9%9B%86%E5%B9%B3%E5%8F%B0%E7%9A%84%E4%B8%80%E7%82%B9%E7%95%85%E6%83%B3/" >关于cms漏洞收集平台的一点畅想</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/2019/11/06/slq-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93-%E4%B8%AD/" >slq-注入总结(中)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/2019/11/06/sql-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93(%E4%B8%8A)/" >sql-注入总结(上)</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="python"><span class="iconfont-archer">&#xe606;</span>python</span>
+    
+        <span class="sidebar-tag-name" data-tags="web安全"><span class="iconfont-archer">&#xe606;</span>web安全</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "John Doe"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
