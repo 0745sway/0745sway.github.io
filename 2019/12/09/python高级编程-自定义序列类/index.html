@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="John Doe">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="John Doe">
+    
+    <meta name="keywords" content="se10rc's blog">
+    
+    <meta name="description" content="">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>python高级编程(自定义序列类) · se10rc&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/favicon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >se10rc&#39;s blog</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">python高级编程(自定义序列类)</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>se10rc's blog</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/se10rc.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            python高级编程(自定义序列类)
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" target="_blank" rel="noopener" data-tags = "python">python</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count word-count">1.4k</span>Reading time: <span class="post-count reading-time">5 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/12/09</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>Python的序列类型非常丰富，包括了列表(list)，元组(tuple)，字符串(str)， 字节数组(bytes),队列(deque)，今天我们就着重了解下python中的这些内置序列类型。</p>
+<h1 id="序列类型的分类"><a href="#序列类型的分类" class="headerlink" title="序列类型的分类"></a>序列类型的分类</h1><hr>
+<h2 id="容器序列"><a href="#容器序列" class="headerlink" title="容器序列"></a>容器序列</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">list</span><br><span class="line">tuple</span><br><span class="line">deque</span><br><span class="line">能存放不同类型的数据</span><br></pre></td></tr></table></figure>
+<h2 id="扁平序列"><a href="#扁平序列" class="headerlink" title="扁平序列"></a>扁平序列</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">str</span><br><span class="line">bytes</span><br><span class="line">bytearray</span><br><span class="line">array.array</span><br><span class="line">memoryview(内存视图)</span><br><span class="line">存放的是相同类型的数据</span><br></pre></td></tr></table></figure>
+<h2 id="容器序列和扁平序列有什么不同呢？"><a href="#容器序列和扁平序列有什么不同呢？" class="headerlink" title="容器序列和扁平序列有什么不同呢？"></a>容器序列和扁平序列有什么不同呢？</h2><p>容器序列存放的实际上是对象的引用，因此可以存放不同类型的数据；扁平序列存放的是对象的值，是一段连续的内存空间，因此要求对象必须是相同类型的数据才行，如字符、数字、字节。</p>
+<h2 id="可变序列"><a href="#可变序列" class="headerlink" title="可变序列"></a>可变序列</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">list</span><br><span class="line">deque</span><br><span class="line">bytearray</span><br><span class="line">array</span><br><span class="line">顾名思义 可修改</span><br></pre></td></tr></table></figure>
+
+<h2 id="不可变序列"><a href="#不可变序列" class="headerlink" title="不可变序列"></a>不可变序列</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">str</span><br><span class="line">tuple</span><br><span class="line">bytes</span><br><span class="line">与上面相反不可修改</span><br></pre></td></tr></table></figure>
+<h2 id="序列的abc继承关系"><a href="#序列的abc继承关系" class="headerlink" title="序列的abc继承关系"></a>序列的abc继承关系</h2><p>在collections.abc 中有所有序列类型的抽象基类(父类)，那么每个序列类型要想去实现实例化就得重写抽象基类中的所有方法，这样就能够控制以上序列类型的功能。那么我们自己想实现一个序列类型那么我们就要遵循抽象基类的接口重写接口功能即可。</p>
+<h2 id="序列的-、-和extend的区别"><a href="#序列的-、-和extend的区别" class="headerlink" title="序列的+、+=和extend的区别"></a>序列的+、+=和extend的区别</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python</span><br><span class="line">a =[1,2]</span><br><span class="line">b= a+[3,4]</span><br><span class="line">print(b)</span><br><span class="line">&gt;&gt;&gt;[1,2,3,4]</span><br><span class="line">产生了一个新的list</span><br><span class="line">+符号的两边需要为同一序列类型</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">python</span><br><span class="line">a =[1,2]</span><br><span class="line">a +=[3,4]</span><br><span class="line">print(a)</span><br><span class="line">&gt;&gt;&gt;[1,2,3,4]</span><br><span class="line">并没有创建新的序列，而且两边的序列类型随意即可</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">python</span><br><span class="line">a =[1,2]</span><br><span class="line">a.extend(rang(3))</span><br><span class="line">&gt;&gt;&gt;[1,2,0,1,2]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">python</span><br><span class="line">a =[1,2]</span><br><span class="line">a.apend([3,4])</span><br><span class="line">print(a)</span><br><span class="line">&gt;&gt;&gt;[1,2,[3,4]]</span><br><span class="line">不进行遍历直接拼接</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现可切片对象"><a href="#实现可切片对象" class="headerlink" title="实现可切片对象"></a>实现可切片对象</h2><p>首先了解下什么是切片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">模式[start:end:step]</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line">    其中，第一个数字start表示切片开始位置，默认为0；</span><br><span class="line">    第二个数字end表示切片截止（但不包含）位置（默认为列表长度）；</span><br><span class="line">    第三个数字step表示切片的步长（默认为1）。</span><br><span class="line">    当start为0时可以省略，当end为列表长度时可以省略，</span><br><span class="line">    当step为1时可以省略，并且省略步长时可以同时省略最后一个冒号。</span><br><span class="line">    另外，当step为负整数时，表示反向切片，这时start应该比end的值要大才行。</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line">aList = [3, 4, 5, 6, 7, 9, 11, 13, 15, 17]</span><br><span class="line">print (aList[::])  # 返回包含原列表中所有元素的新列表</span><br><span class="line">print (aList[::-1])  # 返回包含原列表中所有元素的逆序列表</span><br><span class="line">print (aList[::2])  # 隔一个取一个，获取偶数位置的元素</span><br><span class="line">print (aList[1::2])  # 隔一个取一个，获取奇数位置的元素</span><br><span class="line">print (aList[3:6])  # 指定切片的开始和结束位置</span><br><span class="line">aList[0:100]  # 切片结束位置大于列表长度时，从列表尾部截断</span><br><span class="line">aList[100:]  # 切片开始位置大于列表长度时，返回空列表</span><br><span class="line"></span><br><span class="line">aList[len(aList):] = [9]  # 在列表尾部增加元素</span><br><span class="line">aList[:0] = [1, 2]  # 在列表头部插入元素</span><br><span class="line">aList[3:3] = [4]  # 在列表中间位置插入元素</span><br><span class="line">aList[:3] = [1, 2]  # 替换列表元素，等号两边的列表长度相等</span><br><span class="line">aList[3:] = [4, 5, 6]  # 等号两边的列表长度也可以不相等</span><br><span class="line">aList[::2] = [0] * 3  # 隔一个修改一个</span><br><span class="line">print (aList)</span><br><span class="line">aList[::2] = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;]  # 隔一个修改一个</span><br><span class="line">aList[::2] = [1,2]  # 左侧切片不连续，等号两边列表长度必须相等</span><br><span class="line">aList[:3] = []  # 删除列表中前3个元素</span><br><span class="line"></span><br><span class="line">del aList[:3]  # 切片元素连续</span><br><span class="line">del aList[::2]  # 切片元素不连续，隔一个删一个</span><br></pre></td></tr></table></figure>
+
+<p>实现可切片的对象那么我们就要实现序列类型中的接口代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">import numbers</span><br><span class="line">class Group:</span><br><span class="line">    #支持切片操作</span><br><span class="line">    def __init__(self, group_name, company_name, staffs):</span><br><span class="line">        self.group_name = group_name</span><br><span class="line">        self.company_name = company_name</span><br><span class="line">        self.staffs = staffs</span><br><span class="line"></span><br><span class="line">    def __reversed__(self):</span><br><span class="line">        self.staffs.reverse()</span><br><span class="line"></span><br><span class="line">    def __getitem__(self, item):</span><br><span class="line">        cls = type(self)</span><br><span class="line">        if isinstance(item, slice):</span><br><span class="line">            return cls(group_name=self.group_name, company_name=self.company_name, staffs=self.staffs[item])</span><br><span class="line">        elif isinstance(item, numbers.Integral):</span><br><span class="line">            return cls(group_name=self.group_name, company_name=self.company_name, staffs=[self.staffs[item]])</span><br><span class="line"></span><br><span class="line">    def __len__(self):</span><br><span class="line">        return len(self.staffs)</span><br><span class="line"></span><br><span class="line">    def __iter__(self):</span><br><span class="line">        return iter(self.staffs)</span><br><span class="line"></span><br><span class="line">    def __contains__(self, item):</span><br><span class="line">        if item in self.staffs:</span><br><span class="line">            return True</span><br><span class="line">        else:</span><br><span class="line">            return False</span><br><span class="line"></span><br><span class="line">staffs = [&quot;bobby1&quot;, &quot;imooc&quot;, &quot;bobby2&quot;, &quot;bobby3&quot;]</span><br><span class="line">group = Group(company_name=&quot;imooc&quot;, group_name=&quot;user&quot;, staffs=staffs)</span><br><span class="line">reversed(group)</span><br><span class="line">for user in group:</span><br><span class="line">    print(user)</span><br></pre></td></tr></table></figure>
+<h2 id="bisect管理可排序序列"><a href="#bisect管理可排序序列" class="headerlink" title="bisect管理可排序序列"></a>bisect管理可排序序列</h2><p>作用：用来处理已排序的序列，升序。<br>代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import bisect</span><br><span class="line">from collections import deque</span><br><span class="line"></span><br><span class="line">#用来处理已排序的序列，用来维持已排序的序列， 升序</span><br><span class="line">#二分查找</span><br><span class="line">inter_list = deque()</span><br><span class="line">bisect.insort(inter_list, 3)</span><br><span class="line">bisect.insort(inter_list, 2)</span><br><span class="line">bisect.insort(inter_list, 5)</span><br><span class="line">bisect.insort(inter_list, 1)</span><br><span class="line">bisect.insort(inter_list, 6)</span><br><span class="line"></span><br><span class="line">print(bisect.bisect_left(inter_list, 3))</span><br><span class="line">#学习成绩</span><br><span class="line">print(inter_list)</span><br></pre></td></tr></table></figure>
+<h1 id="列表推导式、生成器表达式、字典推导式"><a href="#列表推导式、生成器表达式、字典推导式" class="headerlink" title="列表推导式、生成器表达式、字典推导式"></a>列表推导式、生成器表达式、字典推导式</h1><hr>
+<p>不多逼逼直接看代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#用简介的方式去遍历可迭代对象生成需要格式的列表</span><br><span class="line">int_list = [1,2,3,4,5]</span><br><span class="line"></span><br><span class="line">qu_list = [item * item for item in int_list]</span><br><span class="line">print (type(qu_list))</span><br><span class="line">int_list = [1,2,-3,4,5]</span><br><span class="line"></span><br><span class="line">qu_list = [item if item &gt; 0 else abs(item) for item in int_list]</span><br><span class="line"></span><br><span class="line">#笛卡尔积</span><br><span class="line">int_list1 = [1,2]</span><br><span class="line">int_list2 = [3,4]</span><br><span class="line"></span><br><span class="line">qu_list = [(first, second) for first in int_list1 for second in int_list2]</span><br><span class="line"></span><br><span class="line">my_dict = &#123;</span><br><span class="line">    &quot;key1&quot;:&quot;bobby1&quot;,</span><br><span class="line">    &quot;key2&quot;:&quot;bobby2&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># qu_list = [(key, value) for key, value in my_dict.items()]</span><br><span class="line">#</span><br><span class="line"># qu_list2 = list(((key, value) for key, value in my_dict.items()))</span><br><span class="line">#</span><br><span class="line"># for item in qu_list2:</span><br><span class="line">#     print (item)</span><br><span class="line"></span><br><span class="line">int_list = [1,2,3,4,5]</span><br><span class="line"></span><br><span class="line">def process_item(item):</span><br><span class="line">    return str(item)</span><br><span class="line"></span><br><span class="line">int_dict = &#123;process_item(item):item for item in int_list&#125;</span><br><span class="line">#列表生成式，第一：能用尽量用， 因为效率高</span><br><span class="line">print (int_dict)</span><br></pre></td></tr></table></figure>
+
+<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><hr>
+<p>今天晚上又学了一章，还是比较充实的，👋。</p>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/12/06/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E7%B1%BB%E5%92%8C%E5%AF%B9%E8%B1%A1/" title= "python高级编程(深入理解类和对象)">
+                    <div class="prevTitle">python高级编程(深入理解类和对象)</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:0745sec@gmail.com" target="_blank" rel="noopener" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/se10rc" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#序列类型的分类"><span class="toc-number">1.</span> <span class="toc-text">序列类型的分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#容器序列"><span class="toc-number">1.1.</span> <span class="toc-text">容器序列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扁平序列"><span class="toc-number">1.2.</span> <span class="toc-text">扁平序列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#容器序列和扁平序列有什么不同呢？"><span class="toc-number">1.3.</span> <span class="toc-text">容器序列和扁平序列有什么不同呢？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#可变序列"><span class="toc-number">1.4.</span> <span class="toc-text">可变序列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#不可变序列"><span class="toc-number">1.5.</span> <span class="toc-text">不可变序列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#序列的abc继承关系"><span class="toc-number">1.6.</span> <span class="toc-text">序列的abc继承关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#序列的-、-和extend的区别"><span class="toc-number">1.7.</span> <span class="toc-text">序列的+、+=和extend的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现可切片对象"><span class="toc-number">1.8.</span> <span class="toc-text">实现可切片对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bisect管理可排序序列"><span class="toc-number">1.9.</span> <span class="toc-text">bisect管理可排序序列</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#列表推导式、生成器表达式、字典推导式"><span class="toc-number">2.</span> <span class="toc-text">列表推导式、生成器表达式、字典推导式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#写在最后"><span class="toc-number">3.</span> <span class="toc-text">写在最后</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 8
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/09</span><a class="archive-post-title" href= "/2019/12/09/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%8F%E5%88%97%E7%B1%BB/" >python高级编程(自定义序列类)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span><a class="archive-post-title" href= "/2019/12/06/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E7%B1%BB%E5%92%8C%E5%AF%B9%E8%B1%A1/" >python高级编程(深入理解类和对象)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span><a class="archive-post-title" href= "/2019/12/05/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E9%AD%94%E6%B3%95%E5%87%BD%E6%95%B0%EF%BC%89/" >python高级编程（魔法函数）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span><a class="archive-post-title" href= "/2019/12/04/python%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E4%B8%80%E5%88%87%E7%9A%86%E5%AF%B9%E8%B1%A1%EF%BC%89/" >python高级编程（一切皆对象）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href= "/2019/11/27/%E6%B9%96%E6%B9%98%E6%9D%AF%E7%BA%BF%E4%B8%8B%E8%B5%9B%E6%84%9F%E6%83%B3/" >湖湘杯线下赛感想</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/13</span><a class="archive-post-title" href= "/2019/11/13/%E5%85%B3%E4%BA%8Ecms%E6%BC%8F%E6%B4%9E%E6%94%B6%E9%9B%86%E5%B9%B3%E5%8F%B0%E7%9A%84%E4%B8%80%E7%82%B9%E7%95%85%E6%83%B3/" >关于cms漏洞收集平台的一点畅想</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/2019/11/06/slq-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93-%E4%B8%AD/" >slq-注入总结(中)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/06</span><a class="archive-post-title" href= "/2019/11/06/sql-%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93(%E4%B8%8A)/" >sql-注入总结(上)</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="python"><span class="iconfont-archer">&#xe606;</span>python</span>
+    
+        <span class="sidebar-tag-name" data-tags="web安全"><span class="iconfont-archer">&#xe606;</span>web安全</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "John Doe"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
